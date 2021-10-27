@@ -9,7 +9,7 @@
 #property strict
 input int      MagicNum=12;
 input double   lot=0.01;
-input int      MaxDanShu=11;
+input int      MaxDanShu=9;
 input int      止盈点数=3000;
 input int      加仓点数=3000;
 input int      xau止盈点数=3000;
@@ -69,7 +69,11 @@ void OnTick()
            }
         }
      }
-
+   Print("last_buy_open_price:"+last_buy_open_price);
+   Print("last_buy_open_lot:"+last_buy_open_lot);
+   Print("last_sell_open_price:"+last_sell_open_price);
+   Print("last_sell_open_lot:"+last_sell_open_lot);
+   
    if(buy_count==0 && buy_count<=MaxDanShu)
      {
       //开第一单
@@ -88,13 +92,13 @@ void OnTick()
             double lotbuy = last_buy_open_lot*2;
             int ticket=OrderSend(Symbol(),OP_BUY,lotbuy,Ask,3,0,takeprofit,"buy-"+IntegerToString(buy_count+1),MagicNum,0,clrNONE);
             //修改止盈
-            for(int j=0; j<buy_count; j++)
+            for(int j=0; j<OrdersTotal(); j++)
               {
                if(OrderSelect(j,SELECT_BY_POS) && OrderSymbol()==Symbol() && OrderMagicNumber()==MagicNum && OrderType()==OP_BUY)
                  {
                   //double stoploss = NormalizeDouble(Bid-Point*2000,Digits);
                   double stoploss = 0;
-                  double takeprofit = NormalizeDouble(Bid+Point*止盈点数,Digits); //+Point*点差
+                  double takeprofit = NormalizeDouble(Ask+Point*止盈点数,Digits); //+Point*点差
                   bool mod_bool = OrderModify(OrderTicket(),OrderOpenPrice(),stoploss,takeprofit,0,clrNONE);
                   Print(mod_bool);
                  }
@@ -110,7 +114,7 @@ void OnTick()
       double stoploss = 0;
       //double takeprofit = 0;
       double takeprofit = NormalizeDouble(Bid-止盈点数*Point,Digits);
-      int ticket=OrderSend(Symbol(),OP_SELL,lot,Ask,3,stoploss,takeprofit,"sell-"+IntegerToString(sell_count+1),MagicNum,0,clrNONE);
+      int ticket=OrderSend(Symbol(),OP_SELL,lot,Bid,3,stoploss,takeprofit,"sell-"+IntegerToString(sell_count+1),MagicNum,0,clrNONE);
      }
    else
 
@@ -120,9 +124,9 @@ void OnTick()
            {
             double takeprofit = NormalizeDouble(Bid-止盈点数*Point,Digits);
             double lotsell = last_sell_open_lot*2;
-            int ticket=OrderSend(Symbol(),OP_BUY,lotsell,Ask,3,0,takeprofit,"sell-"+IntegerToString(sell_count+1),MagicNum,0,clrNONE);
+            int ticket=OrderSend(Symbol(),OP_BUY,lotsell,Bid,3,0,takeprofit,"sell-"+IntegerToString(sell_count+1),MagicNum,0,clrNONE);
             //修改止盈
-            for(int j=0; j<sell_count; j++)
+            for(int j=0; j<OrdersTotal(); j++)
               {
                if(OrderSelect(j,SELECT_BY_POS) && OrderSymbol()==Symbol() && OrderMagicNumber()==MagicNum && OrderType()==OP_SELL)
                  {
